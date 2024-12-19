@@ -129,7 +129,6 @@ async def back_to_games_handler(message: types.Message, state: FSMContext):
     await message.answer("Вы вернулись в раздел игр.", reply_markup=get_games_menu())
 
 
-
 # Начало игры в рулетку
 @dp.message(lambda msg: msg.text in ["🔴 Красное", "⚫ Черное", "🟢 Зеленое"])
 async def choose_color_handler(message: types.Message, state: FSMContext):
@@ -172,10 +171,20 @@ async def place_bet_handler(message: types.Message, state: FSMContext):
         """Форматирует число с разделением тысяч точками."""
         return "{:,.0f}".format(number).replace(",", ".")
 
-    # Логика рулетки
+    # Логика рулетки с измененными весами
+    weights = {
+        "red": 30 if color == "red" else 67.3,
+        "black": 30 if color == "black" else 67.3,
+        "green": 2.7
+    }
+
+    total_weight = weights["red"] + weights["black"] + weights["green"]
+    normalized_weights = [weights["red"] / total_weight, weights["black"] / total_weight,
+                          weights["green"] / total_weight]
+
     result = random.choices(
         ["red", "black", "green"],
-        weights=[48.65, 48.65, 2.7],
+        weights=normalized_weights,
         k=1
     )[0]
     payout_multiplier = {"red": 2, "black": 2, "green": 14}
